@@ -1,0 +1,21 @@
+Create python code to develop an anomaly detection model with bank transaction data:
+
+Data source: 
+S3 in AWS, in the folder "Dataset" to load all csv which are 12: January, February, March, April, May, June, June, July, August, September, October, November and December. 
+
+
+Columns of each CSV:
+Transaction_ID,Date,Time,Account_Number,Transaction_Type,Description,
+Amount, Currency, Merchant_Name, Merchant_Category, Location,
+Reference_Number,Card_Type,Card_Number,Authorization_Code,Channel
+,Customer_ID,Customer_Name,Branch_CodeTransaction_Status
+
+
+Objective:  
+Analyse if there are unusual patterns in the behaviour of users in their banking transactions.
+Develop a function to evaluate the reliability and certainty of the time series forecast model.
+Deploy this model 3 hours from Monday to Friday.
+
+
+Destination of the final model:
+Export the final result in S3 in AWS, in the folder "ML Production".

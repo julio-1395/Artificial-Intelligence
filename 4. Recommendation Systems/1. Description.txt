@@ -1,0 +1,15 @@
+Create the python code to develop a model of a recommender system with products from an e-chain. 
+
+Data source: 
+S3 in AWS, in the folder "Dataset" to load all csv which are 12: January, February, March, April, May, June, June, July, August, September, October, November and December. 
+
+Objective:  
+Suggest the best selling products each week from January 1st to December 31st.
+
+Develop 3 functions:
+1. Evaluate the reliability and certainty of the recommendation model.
+2. Evaluate the errors of the model with respect to the last one of the previous week, if they have errors, export the errors in CSV in S3 in AWS in the folder "Errors Recommendation Model".
+3. Evaluate if the load data have the same type of format and without errors and duplicates. If they have errors export the errors in CSV in S3 in AWS in the folder "Errors data load".
+
+Destination of the final model:
+Export the final result in S3 in AWS, in the folder "ML Production".

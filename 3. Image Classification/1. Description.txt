@@ -1,0 +1,3 @@
+--Create an image classification model with python for tagging as animals.
+
+--Data source: S3 on AWS

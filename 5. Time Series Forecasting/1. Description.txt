@@ -1,0 +1,12 @@
+Create the python code to develop a time series forecasting model with products from a supermarket chain.
+
+Data source: 
+S3 in AWS, in the folder "Dataset" to load all csv which are 12: January, February, March, April, May, June, June, July, August, September, October, November and December. 
+
+Objective:  
+Predict the trend by quarter of the transport costs of the logistics providers.
+
+Develop a function to evaluate the reliability and certainty of the time series forecast model.
+
+Destination of the final model:
+Export the final result in S3 in AWS, in the folder "ML Production".
