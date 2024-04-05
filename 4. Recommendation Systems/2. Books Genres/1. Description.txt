@@ -1,0 +1,24 @@
+
+"Create the python code to develop a recommendation system model with products from a library that sells on the internet"
+
+Data source: 
+S3 in AWS, in the folder "Sales_2023" load all csv which are 12: January, February, March, April, May, June, June, June, July, August, September, October, November and December. 
+
+Columns: 
+Transaction_ID, Customer_ID, Customer_Name, Order_Date, Order_Time, Product_ID, Author, Genre, Publisher,Unit_Price, Total_Price, 
+Discount, Payment_Method, Rating_ID, Customer_ID, Rating, Review
+
+Model Type:
+Content based.
+
+Objective:  
+Suggest the 5 products by book genre that have better ratings. 
+
+Develop 3 functions:
+1. Evaluate the reliability and certainty of the recommendation model.
+2. Evaluate the errors of the model with respect to the last one of the previous week, if they have errors, export the errors in CSV in S3 in AWS in the folder "Errors Recommendation Model".
+3. Evaluate if the load data has the same type of format and no errors or duplicates. If they have errors export the errors in CSV in S3 in AWS in the folder "Errors data load".
+
+Destination of the final model:
+Export the final result in S3 on AWS in the folder "ML Production".
+
