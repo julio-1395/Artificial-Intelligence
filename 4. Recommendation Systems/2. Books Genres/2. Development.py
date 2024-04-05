@@ -1,95 +1,64 @@
 import pandas as pd
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 import boto3
-from io import StringIO
+import io
 
+# Function to load data from S3
 def load_data_from_s3(bucket_name, folder_name):
-    # Initialize S3 client
     s3 = boto3.client('s3')
-    
-    # List all objects in the specified folder
-    response = s3.list_objects_v2(Bucket=bucket_name, Prefix=folder_name)
-    
-    # Initialize an empty DataFrame to store data
-    df_list = []
-    
-    # Loop through each object in the folder
-    for obj in response['Contents']:
-        # Extract the file name
-        file_name = obj['Key'].split('/')[-1]
-        
-        # Check if the file is a CSV
-        if file_name.endswith('.csv'):
-            # Load the CSV file from S3 into a DataFrame
-            obj = s3.get_object(Bucket=bucket_name, Key=obj['Key'])
-            df = pd.read_csv(obj['Body'])
-            
-            # Append the DataFrame to the list
-            df_list.append(df)
-    
-    # Concatenate all DataFrames into one
-    merged_df = pd.concat(df_list, ignore_index=True)
-    
-    return merged_df
+    files = ['January.csv', 'February.csv', 'March.csv', 'April.csv', 'May.csv', 'June.csv', 'July.csv', 
+             'August.csv', 'September.csv', 'October.csv', 'November.csv', 'December.csv']
+    data_frames = []
+    for file in files:
+        obj = s3.get_object(Bucket=bucket_name, Key=f"{folder_name}/{file}")
+        data_frames.append(pd.read_csv(obj['Body']))
+    return pd.concat(data_frames, ignore_index=True)
 
-def preprocess_data(df):
-    # Drop duplicates and missing values
-    df.drop_duplicates(inplace=True)
-    df.dropna(inplace=True)
-    
-    return df
+# Function to preprocess data
+def preprocess_data(data):
+    # Drop irrelevant columns
+    data = data[['Product_ID', 'Genre', 'Rating']]
+    # Remove duplicates if any
+    data.drop_duplicates(inplace=True)
+    return data
 
-def recommend_top_rated_books(df):
-    # Group by Genre and calculate average rating for each genre
-    genre_avg_rating = df.groupby('Genre')['Rating'].mean().reset_index()
-    
-    # Sort by rating in descending order
-    top_rated_genre = genre_avg_rating.sort_values(by='Rating', ascending=False).head(5)
-    
-    return top_rated_genre
-
-def evaluate_model(model):
-    # Placeholder for model evaluation code
-    pass
-
-def export_errors_to_s3(errors_df, bucket_name, folder_name):
-    # Initialize S3 client
-    s3 = boto3.client('s3')
-    
-    # Convert DataFrame to CSV format
-    csv_buffer = StringIO()
-    errors_df.to_csv(csv_buffer, index=False)
-    
-    # Upload CSV file to S3
-    response = s3.put_object(
-        Bucket=bucket_name,
-        Key=f"{folder_name}/errors.csv",
-        Body=csv_buffer.getvalue()
-    )
-
-def main():
-    # Load data from S3
-    bucket_name = 'your_bucket_name'
-    folder_name = 'Sales_2023'
-    sales_data = load_data_from_s3(bucket_name, folder_name)
-    
+# Function to train content-based recommendation model
+def train_content_based_model(data):
     # Preprocess data
-    sales_data = preprocess_data(sales_data)
-    
-    # Recommend top rated books by genre
-    top_rated_books = recommend_top_rated_books(sales_data)
-    
-    # Evaluate model
-    evaluate_model(top_rated_books)
-    
-    # Export errors (if any) to S3
-    errors_df = pd.DataFrame()  # Placeholder for errors DataFrame
-    export_errors_to_s3(errors_df, bucket_name, 'Errors_Recommendation_Model')
-    
-    # Export final result to S3
-    top_rated_books.to_csv('top_rated_books.csv', index=False)
-    s3 = boto3.resource('s3')
-    s3.Bucket(bucket_name).upload_file('top_rated_books.csv', f'ML_Production/top_rated_books.csv')
-    
-if __name__ == "__main__":
-    main()
+    data = preprocess_data(data)
+    # Group by Genre and calculate mean rating
+    genre_ratings = data.groupby('Genre')['Rating'].mean().reset_index()
+    # Sort by rating in descending order
+    genre_ratings = genre_ratings.sort_values(by='Rating', ascending=False)
+    return genre_ratings
+
+# Function to evaluate model reliability and certainty
+def evaluate_model(genre_ratings):
+    # Calculate mean rating across all genres
+    mean_rating = genre_ratings['Rating'].mean()
+    # Calculate standard deviation of ratings
+    std_rating = genre_ratings['Rating'].std()
+    return mean_rating, std_rating
+
+# Function to export data to S3
+def export_to_s3(data, bucket_name, folder_name, file_name):
+    s3 = boto3.client('s3')
+    csv_buffer = io.StringIO()
+    data.to_csv(csv_buffer, index=False)
+    s3.put_object(Bucket=bucket_name, Key=f"{folder_name}/{file_name}", Body=csv_buffer.getvalue())
+
+# Load data from S3
+bucket_name = 'your_bucket_name'
+folder_name = 'Sales_2023'
+data = load_data_from_s3(bucket_name, folder_name)
+
+# Train content-based recommendation model
+genre_ratings = train_content_based_model(data)
+
+# Evaluate model reliability and certainty
+mean_rating, std_rating = evaluate_model(genre_ratings)
+
+# Export the final model to S3
+export_to_s3(genre_ratings, bucket_name, 'ML Production', 'content_based_model.csv')
