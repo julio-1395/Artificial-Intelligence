@@ -39,19 +39,16 @@ def preprocess_data(df):
     
     return df
 
-def recommend_top_rated_books_by_genre(df):
-    # Group by genre and calculate average rating for each product
-    genre_avg_rating = df.groupby(['Genre', 'Product_ID'])['Rating'].mean().reset_index()
+def recommend_top_rated_books(df):
+    # Group by Genre and calculate average rating for each genre
+    genre_avg_rating = df.groupby('Genre')['Rating'].mean().reset_index()
     
-    # Sort by rating in descending order for each genre
-    genre_avg_rating.sort_values(by=['Genre', 'Rating'], ascending=[True, False], inplace=True)
+    # Sort by rating in descending order
+    top_rated_genre = genre_avg_rating.sort_values(by='Rating', ascending=False).head(5)
     
-    # Get top 5 rated books for each genre
-    top_rated_books_by_genre = genre_avg_rating.groupby('Genre').head(5)
-    
-    return top_rated_books_by_genre
+    return top_rated_genre
 
-def evaluate_model():
+def evaluate_model(model):
     # Placeholder for model evaluation code
     pass
 
@@ -80,10 +77,10 @@ def main():
     sales_data = preprocess_data(sales_data)
     
     # Recommend top rated books by genre
-    top_rated_books = recommend_top_rated_books_by_genre(sales_data)
+    top_rated_books = recommend_top_rated_books(sales_data)
     
     # Evaluate model
-    evaluate_model()
+    evaluate_model(top_rated_books)
     
     # Export errors (if any) to S3
     errors_df = pd.DataFrame()  # Placeholder for errors DataFrame
